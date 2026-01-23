@@ -1,8 +1,22 @@
 timeunit 100ns;
-timeprecision 100ps;
+timeprecision 100ns;
 
-interface bus_if (input logic clk, input logic [31:0] write_ad, output logic [31:0] read_ad, output logic Rd_clk, output logic Wr_clk, input logic [31:0] busIP_data_wr, output logic [31:0] busIP_data_rd);
+interface bus_if #(DATA_WIDTH = 32, ADDR_WIDTH = 16);
+	
+	//Declaration
+	logic clk, reset;
 
-modport();
+	wire [ADDR_WIDTH-1:0] addr;
+	wire [DATA_WIDTH-1:0] write_data;
+	wire [DATA_WIDTH-1:0] read_data;
+	
+	logic read,write;
 
-endinterface : bus_int
+	logic valid,ready;
+	//The data direction
+
+	modport master_reg (input read, read_data, output addr, write_data, write, valid, ready);
+
+	modport slave_reg (input addr,write_data,write,valid,ready, output read,read_data);
+
+endinterface : bus_if
