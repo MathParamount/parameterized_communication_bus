@@ -2,7 +2,7 @@
 
 he project roadmap is:
 
-bus_if -> arbiter -> bus_controller -> slave_reg
+master_reg -> bus_if -> arbiter -> bus_controller -> slave_reg
 
 
 The project interface needs 11 input and 8 output:
