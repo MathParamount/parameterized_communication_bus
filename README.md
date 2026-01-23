@@ -37,6 +37,10 @@ write_data_ready;
 write_resp;
 write_resp_valid;
 
+-------------------------
+
+Inicialmente acabei fazendo 11 entradas e 8 saídas, mas preferi simplificar o mais possível para facilitar a criação da fsm e o debug depois. O objetivo não é criar o mais legitimo possível, mas algo mais simples para aprendizagem.
+
 
 # Architecture
 
