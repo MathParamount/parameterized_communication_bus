@@ -19,7 +19,7 @@ module master_reg
 	input logic clk, bus_if.master_reg busa, input logic start = 1
 );
 
-	always_ff @(posedge clk)
+	always_ff @(posedge clk or negedge reset)
 	begin
 		//default
 		busa.valid <= 0;
@@ -81,24 +81,25 @@ module master_reg
 					if(busa.read)
 						begin
 						busa.valid <= 1;
+						
+							busa.read_data <= addr;
 
 							if(busa.ready)
 								begin
 									state <= DATA_PHASE;
 
 								end
-								
-							busa.read_data <= addr;
+							
 						end
 
 					else if(busa.write)
 						begin
 						busa.valid <= 1;
 						
-						busa.write_data <= addr;
+						addr <= busa.write_data;
 						
 						if(busa.ready) state <= DATA_PHASE;
-							else if (busa.reset) state <= IDLE; start <= 0;
+						else if (busa.reset) state <= IDLE; start <= 0;
 
 						end
 
