@@ -1,4 +1,4 @@
-`include "bus_if.sv"
+`include "arbiter.sv"
 
 timeunit 100ns;
 timeprecision 100ns;
@@ -28,4 +28,5 @@ module slave_reg
     end
 
 endmodule
+
 
