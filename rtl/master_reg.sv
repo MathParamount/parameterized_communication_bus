@@ -19,13 +19,12 @@ module master_reg
 	input logic clk, bus_if.master_reg busa, input logic start = 1
 );
 
-
 	always_ff @(posedge clk)
 	begin
 		//default
-		busa.valid = 0;
-		busa.read = 0;
-		busa.write = 0;
+		busa.valid <= 0;
+		busa.read <= 0;
+		busa.write <= 0;
 
 		//read
 		case(state)
@@ -40,8 +39,8 @@ module master_reg
 
 					if(busa.ready)
 						begin
-							state = ADDR_PHASE;
-							start = 1;
+							state <= ADDR_PHASE;
+							start <= 1;
 						end
 
 					end
@@ -57,11 +56,10 @@ module master_reg
 								if(busa.ready)
 								begin
 									state <= IDLE;
-									start = 0;
+									start <= 0;
 								end
 
-							$display("The data information is: ");
-							$display(busa.read_data);
+								busa.read_data <= addr;
 							
 							end
 						
@@ -69,9 +67,9 @@ module master_reg
 							begin
 								busa.valid <= 1;
 
-								if(busa.ready) busa.write_data <= read_data;	
+								if(busa.ready) addr <= busa.write_data;	
 								
-								else if(busa.reset) state = IDLE; start = 0;
+								else if(busa.reset) state <= IDLE; start = 0;
 							end
 
 					end
@@ -89,9 +87,8 @@ module master_reg
 									state <= DATA_PHASE;
 
 								end
-							
-							$display("The address information is: ");
-							$display(busa.addr);
+								
+							busa.read_data <= addr;
 						end
 
 					else if(busa.write)
@@ -101,7 +98,7 @@ module master_reg
 						busa.write_data <= addr;
 						
 						if(busa.ready) state <= DATA_PHASE;
-						else if (busa.reset) state = IDLE; start = 0;
+						else if (busa.reset) state <= IDLE; start = 0;
 
 						end
 
