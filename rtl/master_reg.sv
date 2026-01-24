@@ -69,7 +69,7 @@ module master_reg
 
 								if(busa.ready) addr <= busa.write_data;	
 								
-								else if(busa.reset) state <= IDLE; start = 0;
+								else if(busa.reset) state <= IDLE; start <= 0;
 							end
 
 					end
@@ -98,7 +98,7 @@ module master_reg
 						busa.write_data <= addr;
 						
 						if(busa.ready) state <= DATA_PHASE;
-						else if (busa.reset) state <= IDLE; start = 0;
+							else if (busa.reset) state <= IDLE; start <= 0;
 
 						end
 
