@@ -10,8 +10,8 @@ module arbiter;
 
   bus_if inter(clk);
 
-  master m1 (.busm(inter.master_reg));
-  slave  s1 (.busb(inter.slave_reg));
+  master_reg m1 (.busm(inter.master_reg));
+  slave_reg  s1 (.busb(inter.slave_reg));
 
   //interconnection
   assign serv_valid = m1.valid;
@@ -36,3 +36,4 @@ module arbiter;
   end
   
 endmodule
+
