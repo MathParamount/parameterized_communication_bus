@@ -41,6 +41,9 @@ write_resp_valid;
 
 Inicialmente acabei fazendo 11 entradas e 8 saídas, mas preferi simplificar o mais possível para facilitar a criação da fsm e o debug depois. O objetivo não é criar o mais legitimo possível, mas algo mais simples para aprendizagem.
 
+Na parte do master_reg eu inicialmente pensei em criar uma lógica com always_ff em que é sensível ao clk do master para inserir os dados internamente recebidos do barramento e verificar a esbilização dos sinais de ready e valid
+Contudo, eu percebi que o projeto ficaria mais confuso e tem furos na lógica do código.
+Portanto, eu decidi fazer uma fsm com enum de todos os estados possíveis e master_reg decidir a lógica baseado no estado.
 
 # Architecture
 
