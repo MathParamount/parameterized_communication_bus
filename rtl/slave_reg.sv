@@ -3,7 +3,7 @@
 timeunit 100ns;
 timeprecision 100ns;
 
-module master_reg
+module slave_reg
 (
    input logic clk, bus_inf.slave_reg busc, bus_if.master_reg busa
 );
@@ -28,3 +28,4 @@ module master_reg
     end
 
 endmodule
+
