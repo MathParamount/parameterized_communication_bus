@@ -9,12 +9,14 @@ Endly, how I used AXI-Lite and it's a subset of AXI4 protocol. It reduced the co
 
 The architecture is divided amoung master interface, bus interface and slave interface.
 
-'/home/gabriel-cruz/Área de trabalho/project_photos/AXI_LIte.jpeg' 
+![AXI_LIte](https://github.com/user-attachments/assets/6f77516f-2505-414b-99c2-c1ca7e964c82)
+
 
 The master interface was tought to be made with 3 states dubbed: IDLE, DATA PHASE and ADDRESS PHASE. These states was codified with 2 bits. The IDLE state initialize the data and write down a specific address and data to be test and ready signal define if it'll going to another phase.
 The bus inteface is responsible send the data and interconnect the signals. This part of the project was divided between bus_if and arbiter to make the specific functionalities. Being the bus_if responsible for data direction and the arbiter file biddable to interconnect the signals with a simple logic to transmit both two bus.
 
-'/home/gabriel-cruz/Área de trabalho/project_photos/arbiter.png' 
+<img width="1383" height="531" alt="arbiter" src="https://github.com/user-attachments/assets/4b19b7ea-b67e-42f2-ac3f-79200c153bbb" />
+
 
 The slaver interface was tought to be made with 3 states too, whereas the slaver use valid signal to change to another states. Moreover, the read signal is codified and used in sequential and combinational logic, being that the sequential logic handle the read data and combinational logic handle with states.
 
@@ -22,7 +24,7 @@ The slaver interface was tought to be made with 3 states too, whereas the slaver
 
 The project was tought to be work with FSMs in which every states are encoded with specific address. The master and slaver FSM has equal encoding. It works because they are running in different files and works together with the same state to send and receive informations. 
 
-'/home/gabriel-cruz/Área de trabalho/project_photos/FSM_behavior.png'
+<img width="1774" height="958" alt="FSM_behavior" src="https://github.com/user-attachments/assets/ebb1899b-ef65-48f4-bd23-105d8bc349ec" />
 
 ## Testbench 
 
@@ -39,7 +41,8 @@ Was made a lot of system test with GTKWave and we saw that initially the array r
 
 # Compilation
 
-'/home/gabriel-cruz/Área de trabalho/project_photos/compilation.png'
+<img width="1725" height="595" alt="compilation" src="https://github.com/user-attachments/assets/78c5a7e4-242d-4273-b7a4-c128a948f6e0" />
+
 
 For be compiled and run in your desktop you need to install certains packages and update their system.
 In Ubuntu version:
@@ -76,7 +79,8 @@ Hence it will generates a wave file in the root directory of the project and the
 The build directory is used by run_verilator file. This bash file use the testbench file and files build. We implemented a garbage collector to remove the buildd every time that new compilation is running reducing the probability of errors.
 This file was reponsible too to execute the build directory running the simulation and the program as at all.
 
-'/home/gabriel-cruz/Área de trabalho/project_photos/compilation_path.png' 
+<img width="3791" height="2470" alt="compilation_path" src="https://github.com/user-attachments/assets/469a7634-70a3-48ad-91cf-d210ae963bf5" />
+
 
 # Observations
 
