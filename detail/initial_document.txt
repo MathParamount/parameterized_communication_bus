@@ -9,3 +9,5 @@ Made by Dillon Huff in youtube: https://www.youtube.com/watch?v=1zw1HBsjDH8
 Made by Stephen St. Michael: https://www.allaboutcircuits.com/technical-articles/what-are-axi-interconnects-tutorial-master-slave-digital-logic/
 
 Made by AMD: https://docs.amd.com/v/u/en-US/pg161-axi-master-lite
+
+https://en-wikipedia-org.translate.goog/wiki/Advanced_eXtensible_Interface_x_tr_sl=en&_x_tr_tl=pt&_x_tr_hl=pt&_x_tr_pto=tc
