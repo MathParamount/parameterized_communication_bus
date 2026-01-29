@@ -21,8 +21,6 @@ Portanto, eu decidi fazer uma fsm com enum de todos os estados possíveis e mast
 A estrtura de estados do master foi: no caso do IDLE foi a criação de dados zero das variáveis do master e verificação do sinal prontidão do servo para trocar de estado. O caminho dos estados foi pensado para seguir: IDLE -> ADDR_PHASE -> DATA_PHASE. 
 No estado de endereço ele verifica se é leitura ou escrita. Se for leitura(read) ele envia ao barramento o sinal de leitura do endereço. Se for escrita(write) ele envia sinal de escrita de dado ao barramento com a inserção de dado ao endereço.
 
-Na análise de ondas foi visto em simulações que o comportamento do master e slave são os mesmos. Isso é esperado, pois o arbiter não usa uma lógica complexa e só há um único master e slave, assim, o arbiter é apenas um fio que liga ambos os lados. Logo é esperado esse comportamento de mimetismo.
-
 -------------------------
 
 No arbiter: eu inicialmente pensei em fazer um multiplexador na saída do master para o um decodificador que mandava para o endereço específico do slaver e seguiria a mesma lógica do datapath do slaver para o master. Contudo, eu acabei percebendo que como o projeto só tem 1 master e 1 slave não há necessidade de uma lógica aprofundada nas conexões do barramento central. Afinal, o master manda em todo o sistema. Então, bastou eu fazer a interconexão dos sinais e codificar os endereços.
@@ -86,6 +84,28 @@ depois: ./run_verilator.sh
 
 7 tentativa:
 
+# Execute este comando direto no terminal:
+cd /tmp && \
+mkdir -p test_v && cd test_v && \
+cp -rL "/home/gabriel-cruz/Área de trabalho/projetos/parameterized_communication_bus/rtl" . && \
+cp -rL "/home/gabriel-cruz/Área de trabalho/projetos/parameterized_communication_bus/tb" . && \
+cat > sim_main.cpp << 'EOF'
+#include "Vtb_top.h"
+#include "verilated.h"
+int main(int argc, char **argv) {
+    Verilated::commandArgs(argc, argv);
+    Vtb_top *top = new Vtb_top;
+    for (int i = 0; i < 10000; i++) top->eval();
+    delete top;
+    return 0;
+}
+EOF
+verilator -Wall --cc --build rtl/*.sv tb/*.sv --top-module tb_top --exe sim_main.cpp && \
+echo "Compilation successful!" && \
+./obj_dir/Vtb_top
+
+8 tentativa:
+
 ./run_verilator.sh
 
 ------------------------
@@ -104,15 +124,7 @@ O correto é bus_if inter();
 10) Possíveis erros no arbiter foi que é melhor declaração explícita, pois em interface as declarações são diferente de sinais regulares, assim, bus_if.master m1 no argumento do módulo é um erro no arbiter devendo especificar o modport dentro do módulo, como bus_if.master m1_if();
 11) Eu tive que alterar o arquivo com a FSM para usar include invés de package, pois o Icarus tem limitação com o systemverilog packages.
 12) I created a bash file to faciliate the compilation in the root project. The reason is that the path has space and it gives a lot of errors.
-13) Eu percebi que o verilator não estava conseguindo compilar, devido ao caminho com "Área de trabalho" que tem espaço no nome. Assim, eu movi o projeto para outro caminho sem espaço com:
-mkdir -p ~/projects
-mv "/home/gabriel-cruz/Área de trabalho/projetos/parameterized_communication_bus" ~/projects/
 
-depois: cd ~/projects/parameterized_communication_bus
-
-Assim, consegui aplicar o comando de inicialização: ./run_verilator.sh e foi compilado.
-
-14) No master_reg e slave_reg eu tenho always_ff e always_comb eu dirigi duas atribuições (não bloqueante ( <=) e bloqueante(=)) para os mesmos sinais em always_ff e always_comb. O que não pode acontecer. Assim, eu tive que criar novos sinais tipo registradores para não misturar os sinais e compilar o código em verilator.
 ---------------------------------
 
 Aprendi técnicas de debug de código em systemverilog:
@@ -131,7 +143,21 @@ iverilog -g2012 \
   rtl/master_reg.sv \
   -o sim.out
 
-----------------------------------
+--------------------------------------
+Observações:
+Este projeto foi implementado usando systemverilog, em que o objetivo foi implementar um projeto útil com as habilidades aprendidas no curso da Cadence sobre systemverilog. 
+Foi pensado em uma comunicação simples em que há somente 1 master e 1 slave, assim, reduzindo lógica complexa de redirecionamento de dados no barramento.
+Este projeto foi simulado no GTKWave gerado pelas formas de ondas do arquivo em C++ na raiz do projeto chamado sim_main em que ele faz todo o teste do sistema ligando e desativando o reset, clock, contando tempo e gerando as ondas.
+Há limitação do sistema, porque não foi pensando em um sistema com mais slavers nem múltiplos masters mandando sinais e dados para os slavers. Embora haja uma codificação dos estados do sistema não há uma lógica na divisão do ready e valid para o endereço e dado do master e slaver. Além disso, não foi possível criar um arquivo com os estados em forma de package em arquivo diferente, pois houve erros na compilação do arquivo tipo .sh.
+Outrossim, foi pensado em simular o sistema em um FPGA físico, mas é necessário criar outro testbench exclusivo para rodar o programa no FPGA.
+
+O arquivo em bash para execusão do projeto precisa dos seguintes comandos para funcionar:
+
+chmod +x run_verilator.sh
+Logo em seguida deve ser feito:
+./run_verilator.sh
+
+Assim vai ser compilado e gerado o arquivo de forma de onda na pasta root do projeto, chamado: wave.vcd.
 
 # Architecture
 
