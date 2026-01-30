@@ -20,6 +20,14 @@ module master_reg(
     logic [15:0] addr_r;
     logic [31:0] write_data_r;
     
+        
+    //connecting with interface
+    assign busa.valid      = valid_r;
+    assign busa.read       = read_r;
+    assign busa.write      = write_r;
+    assign busa.addr       = addr_r;
+    assign busa.write_data = write_data_r;
+    
     //sequential logic
     always_ff @(posedge clk or negedge reset) begin
         if (!reset) begin
@@ -53,7 +61,9 @@ module master_reg(
             end
             
             ST_ADDR_PHASE: begin
+            	read_r = 1'b1;
                 valid_r = 1'b1;
+                addr_r = 16'h0010;
                 
                 if (busa.ready) begin
                     next_state = ST_DATA_PHASE;
@@ -73,14 +83,7 @@ module master_reg(
             end
         endcase
     end
-    
-    //connecting with interface
-    assign busa.valid      = valid_r;
-    assign busa.read       = read_r;
-    assign busa.write      = write_r;
-    assign busa.addr       = addr_r;
-    assign busa.write_data = write_data_r;
-    
+
 endmodule
 
 `endif
