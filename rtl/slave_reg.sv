@@ -16,7 +16,7 @@ module slave_reg(
     
     //inner registers
     logic ready_r, ready_next;
-    logic [31:0] read_data_r, read_data_next;
+    logic [31:0] read_data_r; // read_data_next;
 	  
     assign busc.ready     = ready_r;
     assign busc.read_data = read_data_r;
@@ -31,8 +31,14 @@ module slave_reg(
         else begin
             state <= next_state;
             ready_r <= ready_next;
-            read_data_r <= read_data_next;
+            //read_data_r <= read_data_next;
     	  end
+    	  
+    	  if(state == ST_ADDR_PHASE && busc.valid && busc.read)
+    	  begin
+    	  	read_data_r <= 32'hCAFEBABE;
+    	  end
+    	  
 	 end
     
     //combinational logic
@@ -40,7 +46,6 @@ module slave_reg(
         // Default values
         next_state = state;
         ready_next = 1'b0;
-        read_data_next = read_data_r;
         
         case (state)
             ST_IDLE: begin
@@ -52,18 +57,13 @@ module slave_reg(
             ST_ADDR_PHASE: begin
                 ready_next = 1'b1;
                 
-                if (busc.read) begin
-                	read_data_next = 32'hCAFEBABE;  	
+                if (busc.valid) begin
+             		next_state = ST_DATA_PHASE;
              	end
-             	else begin
-             	 	read_data_next = read_data_r;
-             	end
-             	
-             	next_state = ST_DATA_PHASE;
+
             end
             
             ST_DATA_PHASE: begin
-            	ready_next = 1'b0;
                 next_state = ST_IDLE;
             end
             
