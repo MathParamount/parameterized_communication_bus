@@ -1,112 +1,190 @@
 # Overview
 
-This project search to use parameterized communication bus like a personal can bus homemade based in a mini AXI-Lite interface. The reason of this work is a real implementation in SystemVerilog that can be used in an industry.
-Firstly, the AXI-Lite is a light bus protocol originated from AMD ideal to a communication with control registers and simple peripheral. Originally It was think to support 32 or 64 bits. It do only one transaction by address. 
-Usually, this kind of project is made with the masters, interface and slavers. The master is responsible to send valid signal to slaver, and interface implement the Bursts protocol that is biddable to tranfer one specific data and address to other slaver. The slaver is responsible to send ready signal to master telling that can receive a data from master. Moreover, the handshake mechanism that works to control the flow of data, throtlling the speed if needed. It is used a lot because we need to implement a method to check if the valid and ready is high to send and receive a specific data obeying the clock behaviour.
-Endly, how I used AXI-Lite and it's a subset of AXI4 protocol. It reduced the complexity with all bursts composed by 1 beat and data accesses use the full data bus width of 32 bits.
+This project implements a parameterized communication bus inspired by a simplified CAN bus architecture, based on the AXI-Lite interface protocol. Designed for real-world industrial applications, this SystemVerilog implementation provides a lightweight, efficient communication solution for control registers and simple peripherals.
+AXI-Lite, a subset of the AMBA AXI4 protocol from AMD, is optimized for single-transaction-per-address communication, typically supporting 32 or 64-bit data widths. Our implementation simplifies the protocol further by using fixed 32-bit data bus widths and single-beat bursts, reducing complexity while maintaining compatibility with AXI-Lite standards.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/8a2b5a8c-d1e8-4023-93d2-33127b605381" alt="AXI Lite diagram" width="50%">  <br><em>AXI-Lite schema</em>
+</p>
+
+The system employs a master-slave architecture with handshake mechanisms for flow control, ensuring reliable data transfer between components while accommodating varying processing speeds.
 
 # Architecture
 
-The architecture is divided amoung master interface, bus interface and slave interface.
+The architecture is divided into three main components:
 
-![AXI_LIte](https://github.com/user-attachments/assets/6f77516f-2505-414b-99c2-c1ca7e964c82)
+- Master interface
 
+* States: IDLE, ADDRESS PHASE, DATA PHASE (encoded with 2 bits);
 
-The master interface was tought to be made with 3 states dubbed: IDLE, DATA PHASE and ADDRESS PHASE. These states was codified with 2 bits. The IDLE state initialize the data and write down a specific address and data to be test and ready signal define if it'll going to another phase.
-The bus inteface is responsible send the data and interconnect the signals. This part of the project was divided between bus_if and arbiter to make the specific functionalities. Being the bus_if responsible for data direction and the arbiter file biddable to interconnect the signals with a simple logic to transmit both two bus.
+* Functionality: Initializes data, writes addresses and data for testing, and uses ready signals to transition between states;
 
-<img width="1383" height="531" alt="arbiter" src="https://github.com/user-attachments/assets/4b19b7ea-b67e-42f2-ac3f-79200c153bbb" />
+* Operation: The master initiates transactions and manages the communication flow;
+    
+- Bus interface
 
+* Components:
 
-The slaver interface was tought to be made with 3 states too, whereas the slaver use valid signal to change to another states. Moreover, the read signal is codified and used in sequential and combinational logic, being that the sequential logic handle the read data and combinational logic handle with states.
+1. bus_if: Handles data direction and signal routing.
+
+2. arbiter: Interconnects signals between buses with simple logic for dual-bus transmission.
+
+* Functionality: Manages data transmission and signal interconnection between master and slav;
+
+- Slave Interface
+
+* States: Three-state FSM (same encoding as master);
+
+* Functionality: Responds to valid signals to transition between states, with sequential logic handling read data and combinational logic managing state transitions;
+
+* Operation: Receives data from master and sends ready signals to acknowledge receipt;
 
 ## Finite state machine(FSM)
 
-The project was tought to be work with FSMs in which every states are encoded with specific address. The master and slaver FSM has equal encoding. It works because they are running in different files and works together with the same state to send and receive informations. 
+Both master and slave interfaces utilize identical state encoding in separate FSMs, synchronized to ensure proper communication. The FSM approach ensures predictable behavior and reliable handshake mechanisms.
 
-<img width="1774" height="958" alt="FSM_behavior" src="https://github.com/user-attachments/assets/ebb1899b-ef65-48f4-bd23-105d8bc349ec" />
+<p align="center">
+  <img height="958" src="https://github.com/user-attachments/assets/d70b991e-36a6-4dda-8b19-e62aea8894b4" alt="FSM_behavior" width="1774">  <br><em>Finite State Machine</em>
+</p>
+
+
+# Simulation and test
 
 ## Testbench 
 
-The testbench was tought to be initialize the signals and data, which we instantiate the interfaces and follow the Design Under Test(DUT) for be a target to simulate in sim_main file.
-Initially the testbench has a lot of problem with clk and reset declaration, but I learned that the those data need to be use in parameter module.
+1. Design Under Test (DUT): Instantiates all interfaces for simulation.
+
+2. Initialization: Handles clock and reset signals with proper parameter module usage.
+
+3. Challenge Resolution: Initial clock/reset declaration issues were resolved through proper parameterization.
 
 ## Sim_main
 
-This file was needed due to the verilator compilation and code simulations. It file used tracing,thus we ringed on of the verilated_vcd_c header. Initially was desactivated the clock and reactivated the reset applying this mechanism for some cycles. Nonetheless, we analyzed the dump file for about 100 samples of times.Hence these simulations was responsible to generates the waves in GTKWave.
+* Tool: Verilator compilation with C++ simulation.
+
+* Features:
+
+1. Uses verilated_vcd_c header for waveform tracing.
+2. Implements clock deactivation/reactivation cycles with reset application.
+3. Analyzes 100 time samples for comprehensive testing.
+4. Generates waveform files compatible with GTKWave.
 
 # Test
 
-Was made a lot of system test with GTKWave and we saw that initially the array read_ata in master and slaver model was set to zero and it didn't call in the project, thus we changed the files to set the read to high in master addr phase to be tested and we saw that the data was sucessful activated and master and slaver was has been in same state and be activated together. It is due to the arbiter code which only inteconeect two interfaces with simple assignments.
+* Initial Issue: Array read_data in master and slave models was initialized to zero and not properly called;
 
-# Compilation
+* Solution: Set read high during master address phase for testing;
 
-<img width="1725" height="595" alt="compilation" src="https://github.com/user-attachments/assets/78c5a7e4-242d-4273-b7a4-c128a948f6e0" />
+* Verification: Successful data activation with synchronized master/slave states;
+
+* Observation: State repetition occurs every 5 clock edges with synchronized ready_r and ready signals due to arbiter interconnection;
 
 
-For be compiled and run in your desktop you need to install certains packages and update their system.
-In Ubuntu version:
+# Compilation prerequisites
 
-```
-sudo apt update; sudo apt upgrade;
-sudo apt install iverilog;
-```
+<p align="center">
+  <img height="595" src="https://github.com/user-attachments/assets/1910a182-26b7-4957-8f7f-303b3d15d7f0" alt="compilation" width="1725">  <br><em>Successful Compilation </em>
+</p>
 
-Once the installation is complete, we will have successfully installed Icarus Verilog on our Ubuntu machine.
-After that you need to install GTKWave using ``` sudo apt-get install gtkwave```.
-
-We need to install verilator and packages:
+## Ubuntu/Debian
 
 ```
-sudo apt-get install verilator;
-sudo apt-get install git help2man perl python3 make
-sudo apt-get install g++  # Alternatively, clang
-sudo apt-get install libgz  # Non-Ubuntu (ignore if gives error)
-sudo apt-get install libfl2  # Ubuntu only (ignore if gives error)
-sudo apt-get install libfl-dev  # Ubuntu only (ignore if gives error)
-sudo apt-get install zlibc zlib1g zlib1g-dev  # Ubuntu only (ignore if gives error)
+sudo apt update && sudo apt upgrade -y
+
+sudo apt install iverilog -y
+
+sudo apt install gtkwave -y
+
+sudo apt install verilator git help2man perl python3 make g++ -y
+
+sudo apt install libfl2 libfl-dev zlibc zlib1g zlib1g-dev -y
+
+
+autoconf
 ```
 
-to be able to create a configuration script: ```autoconf        # Create ./configure script```.
-
-Endly, to compile and run the code in their desktop you'll need to gives permission to execution via terminal, but you need to go to root file of the project and write down:
+Once the installation is complete, we will have successfully installed Icarus Verilog in our Ubuntu machine.
 
 ```
-chmod +x run_verilator.sh;
+cd <project_directory>
+
+chmod +x run_verilator.sh
+
 ./run_verilator.sh
 ```
-Hence it will generates a wave file in the root directory of the project and the build directory.
-The build directory is used by run_verilator file. This bash file use the testbench file and files build. We implemented a garbage collector to remove the buildd every time that new compilation is running reducing the probability of errors.
-This file was reponsible too to execute the build directory running the simulation and the program as at all.
 
-<img width="3791" height="2470" alt="compilation_path" src="https://github.com/user-attachments/assets/469a7634-70a3-48ad-91cf-d210ae963bf5" />
+<p align="center">
+  <img height="2470" src="https://github.com/user-attachments/assets/b178a8ea-d472-4926-b9b4-9fcb2c9f6bda" alt="compilation_path" width="3791">  <br><em>Compilation path</em>
+</p>
 
 
+## Output
+
+* Waveform file (wave.vcd) in project root directory;
+
+* Build directory with compiled artifacts;
+
+* Automatic cleanup of previous builds via garbage collection in script;
+    
 # Observations
 
-Há limitação do sistema, porque não foi pensando em um sistema com mais slavers nem múltiplos masters mandando sinais e dados para os slavers. Embora haja uma codificação dos estados do sistema não há uma lógica na divisão do ready e valid para o endereço e dado do master e slaver. Além disso, não foi possível criar um arquivo com os estados em forma de package em arquivo diferente, pois houve erros na compilação do arquivo tipo .sh.
-Outrossim, foi pensado em simular o sistema em um FPGA físico, mas é necessário criar outro testbench exclusivo para rodar o programa no FPGA.
+1. Master bus requires two rising edges of the ready signal for read activation.
+2. Active write operations display both address and transmitted data.
+3. No address or data displayed when both write and read are low.
+4. Address remains constant throughout the transaction cycle.
+
+<p align="center">
+  <img height="545" src="https://github.com/user-attachments/assets/88110932-c2ff-4e02-a539-97dbab677a15" alt="bus_master_behavior" width="1914"> <br><em>Master bus behaviour</em>
+</p>
 
 
-## Initial errors
+<p align="center">
+  <img height="522" src="https://github.com/user-attachments/assets/5ff89ba2-12f4-4a69-bc1b-93a3a7280ec0" alt="slave_and_bus" width="1911"> <br><em>Slaver bus behaviour</em>
+</p>
 
-1. eu tinha colocado a atribuição da memória e acesso da memória do slave dentro do arbiter o que não pode acontecer e é errado. Também tinha codificação de endereço sem sentido para acesso ao slave_reg. Assim, removi as inserções e acesso da memória no arbiter.
-2. Eu deveria ter colocado a FSM dentro de um package, pois o package serve para compartilhar (typedef), enumerações, tarefas e funções entre múltiplos módulos ou arquivos de verificação. Afinal, o package evita conflitos de nomes no escopo global e melhora manutenção do projeto. Assim, eu todo arquivo que usa o state_t eu devo chamar no topo importar o nome do pacote.
-3. Também eu tive que criar um arquivo separado para colocar o package. Afinal, aprendi que o package não pode estar misturado com o módulo.
-4. No arbiter eu tinha instanciado a interface de forma errada como: bus_if inter(clk);
-O correto é bus_if inter();
-5. Nas interconexões do arbiter eu tinha usado o serv_valid, serv_read, serv_write, serv_addr. O que não faz sentido e é errado.
-6. No testbench eu não instanciei as interfaces dentro do módulo do testbench. Esse instanciamento é a criação de interfaces com os nomes dados dentro do testbench.
-7. Eu coloquei inicialmente interconnect no testbench. O que não precisou.
-8. Eu tinha instanciado o barramento no arbiter. O que não precisou.
-9. Eu tinha colocado uma task para o slave, mas isso estar errado, pois o slave só responde a sinal e não chama task. Também apaguei a task da master_write e coloquei apenas o master_read.
-10. Possíveis erros no arbiter foi que é melhor declaração explícita, pois em interface as declarações são diferente de sinais regulares, assim, bus_if.master m1 no argumento do módulo é um erro no arbiter devendo especificar o modport dentro do módulo, como bus_if.master m1_if();
-11. Eu tive que alterar o arquivo com a FSM para usar include invés de package, pois o Icarus tem limitação com o systemverilog packages.
+<p align="center">
+  <img height="545" src="https://github.com/user-attachments/assets/847d9bc6-499a-4ac0-b7b0-d1b520daaf50" alt="master_slave_behavior" width="1914">  <br><em>The bus behaviour</em>
+</p>
+
+## Limitations
+
+* Designed for single master and slave configuration;
+* No support for multiple masters or slaves;
+* No sophisticated logic for dividing ready and valid signals between address and data phases;
+* Package-based state encoding not implemented due to compilation constraints;
+
+## Future enhancements
+
+* Physical FPGA implementation with dedicated testbench;
+* Support for multiple masters and slaves;
+* Enhanced state management through proper package implementation;
+* Improved arbitration logic for complex scenarios;
+
+
+# Initial errors and corrections
+
+1. Memory Access in Arbiter: Incorrectly placed slave memory assignment within arbiter module. Solution: Removed memory access from arbiter.
+
+2. FSM Packaging: Should have placed FSM in a separate package for better code organization. Solution: Used include statements instead (due to Icarus Verilog limitations with SystemVerilog packages).
+
+3. Interface Instantiation: Wrong interface instantiation in arbiter (bus_if inter(clk);). Solution: Corrected to bus_if inter();.
+
+4. Signal Naming: Used non-existent signals (serv_*) in arbiter interconnections. Solution: Corrected to proper signal names.
+
+5. Testbench Structure: Missing interface instantiations in testbench module. Solution: Added proper interface instantiation.
+
+6. Arbiter Implementation: Unnecessary bus instantiation in arbiter. Solution: Simplified arbiter structure.
+
+7. Task Usage: Incorrect task implementation for slave response. Solution: Removed unnecessary tasks, focused on master_read functionality.
+
+8. Interface Declaration: Improper modport specification in arbiter arguments. Solution: Corrected to explicit interface declarations.
+
+9. Compilation Issues: Icarus Verilog limitations with SystemVerilog packages. Solution: Used include statements instead of packages.
 
 # Conclusion
 
-This project was sucessful made which was learned about the systemverilog, bash and compilation file to systemverilog in C++. This project was so hard, which was needed a lot of research and failed tentatives, but it was a worth learn that 
-ramped up my programming skills. Moreover, we tested a lot of times and recompiled it.
+This project successfully implements a parameterized AXI-Lite communication bus in SystemVerilog, demonstrating practical knowledge of hardware description languages, simulation tools, and verification methodologies. Despite initial challenges with toolchain compatibility and architectural decisions, the final implementation provides a functional, testable system that serves as a foundation for more complex communication architectures.
+The development process significantly enhanced skills in SystemVerilog programming, bash scripting, and C++ integration for hardware simulation. Extensive testing and iterative refinement ensured a robust final product suitable for educational and prototyping purposes.
 
 # Reference
 
