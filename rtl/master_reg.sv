@@ -20,50 +20,41 @@ module master_reg(
     logic [15:0] addr_r;
     logic [31:0] write_data_r;
     
+    //middle variables
+    logic next_valid_r, next_read_r, next_write_r;
+    logic [15:0] next_addr_r;
+    logic [31:0] next_write_data_r;
         
     //connecting with interface
-    assign busa.valid      = valid_r;
+    assign busa.valid      = next_valid_r;
     assign busa.read       = read_r;
     assign busa.write      = write_r;
     assign busa.addr       = addr_r;
     assign busa.write_data = write_data_r;
     
-    //sequential logic
-    always_ff @(posedge clk or negedge reset) begin
-        if (!reset) begin
-            state <= ST_IDLE;
-        end
-        else begin
-            state <= next_state;
-        end
-    end
-    
     //combinational logic
     always_comb begin
         // Default values
         next_state = state;
-        valid_r = 0;
-        read_r = 0;
-        write_r = 0;
-        addr_r = '0;
-        write_data_r = '0;
+        next_valid_r = 1'b0;
+        next_read_r = 1'b0;
+        next_write_r = 1'b0;
+        next_addr_r = '0;
+        next_write_data_r = '0;
         
         case (state)
             ST_IDLE: begin
-                addr_r = 16'h0010;
-                write_data_r = 32'hDEADBEEF;
-                write_r = 1'b1;
-                valid_r = 1'b1;
-                
-                if (busa.ready) begin
-                    next_state = ST_ADDR_PHASE;
-                end
+            	next_state = ST_ADDR_PHASE;
             end
             
             ST_ADDR_PHASE: begin
-            	read_r = 1'b1;
-                valid_r = 1'b1;
-                addr_r = 16'h0010;
+		next_valid_r = 1'b1;
+		
+		//switch one to change from read to write
+                next_read_r = 1'b0;
+        	next_write_r = 1'b1;
+                
+                next_addr_r = 16'h0001;
                 
                 if (busa.ready) begin
                     next_state = ST_DATA_PHASE;
@@ -71,17 +62,40 @@ module master_reg(
             end
             
             ST_DATA_PHASE: begin
-                valid_r = 1'b1;
+            	next_valid_r = 1'b1;
+                
+                if(next_write_r) begin
+        		next_write_data_r = 32'hDEACBEFF;
+                end
+                //master don't do nothing, only look to read;
                 
                 if (busa.ready) begin
                     next_state = ST_IDLE;
                 end
-            end
+                
+              end
+              
+            default: next_state = ST_IDLE;
             
-            default: begin
-                next_state = ST_IDLE;
-            end
         endcase
+    end
+    
+    //sequential logic
+    always_ff @(posedge clk or negedge reset) begin
+        if (!reset) begin
+            write_r <= 1'b0;
+            write_data_r <= '0;
+            state <= ST_IDLE;
+            valid_r <= 1'b0;
+        end
+        else begin        
+            state <= next_state;
+            write_r <= next_write_r;
+            read_r <= next_read_r;
+    	    addr_r <= next_addr_r;
+    	    write_data_r <= next_write_data_r;
+    	    valid_r <= next_valid_r;
+        end
     end
 
 endmodule
