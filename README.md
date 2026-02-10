@@ -79,6 +79,12 @@ Both master and slave interfaces utilize identical state encoding in separate FS
 
 * Observation: State repetition occurs every 5 clock edges with synchronized ready_r and ready signals due to arbiter interconnection;
 
+* Test in Sim_main: Verification of read and write using variables inherited from testbench.
+
+<p align="center">
+  <img height="374" src="https://github.com/user-attachments/assets/06c2005d-e0a0-4340-b95f-91eca506fc39" alt="test_read_and_write" width="989">  <br><em>Sim_main test</em>
+</p>
+
 
 # Compilation prerequisites
 
@@ -180,6 +186,8 @@ chmod +x run_verilator.sh
 8. Interface Declaration: Improper modport specification in arbiter arguments. Solution: Corrected to explicit interface declarations.
 
 9. Compilation Issues: Icarus Verilog limitations with SystemVerilog packages. Solution: Used include statements instead of packages.
+
+10. I learned that the order of the data decision is important and isn't located in data phase. The address phase don't exist data, it only gives the direction to the data phase to obey their commands.
 
 # Conclusion
 
