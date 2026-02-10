@@ -16,11 +16,49 @@ module slave_reg(
     
     //inner registers
     logic ready_r, ready_next;
-    logic [31:0] read_data_r; // read_data_next;
+    logic [31:0] read_data_r, read_data_next;
 	  
     assign busc.ready     = ready_r;
     assign busc.read_data = read_data_r;
-
+    
+    //combinational logic
+    always_comb begin
+        // Default values
+        next_state = state;
+        ready_next = 1'b0;
+        read_data_next = read_data_r;	//remain value
+        
+        case (state)
+            ST_IDLE: begin
+                if (busc.valid) begin
+                    next_state = ST_ADDR_PHASE;
+                end
+            end
+            
+            ST_ADDR_PHASE: begin            	
+                ready_next = 1'b1;
+                
+                if (busc.valid) begin
+                	if(busc.read) begin
+             			read_data_next = 32'hDEADBEAB;	
+             		end
+             		next_state = ST_DATA_PHASE;
+             	end
+            end
+            
+            ST_DATA_PHASE: begin
+            	ready_next = 1'b1;
+            	if (busc.valid) begin
+                	next_state = ST_IDLE;
+            	end
+            end
+            
+            default: begin
+                next_state = ST_IDLE;
+            end
+        endcase
+    end
+    
     //sequential logic
     always_ff @(posedge clk or negedge reset) begin
         if (!reset) begin
@@ -31,48 +69,10 @@ module slave_reg(
         else begin
             state <= next_state;
             ready_r <= ready_next;
-            //read_data_r <= read_data_next;
+            read_data_r <= read_data_next;
     	  end
-    	  
-    	  if(state == ST_ADDR_PHASE && busc.valid && busc.read)
-    	  begin
-    	  	read_data_r <= 32'hCAFEBABE;
-    	  end
-    	  
-	 end
-    
-    //combinational logic
-    always_comb begin
-        // Default values
-        next_state = state;
-        ready_next = 1'b0;
-        
-        case (state)
-            ST_IDLE: begin
-                if (busc.valid) begin
-                    next_state = ST_ADDR_PHASE;
-                end
-            end
-            
-            ST_ADDR_PHASE: begin
-                ready_next = 1'b1;
-                
-                if (busc.valid) begin
-             		next_state = ST_DATA_PHASE;
-             	end
-
-            end
-            
-            ST_DATA_PHASE: begin
-                next_state = ST_IDLE;
-            end
-            
-            default: begin
-                next_state = ST_IDLE;
-            end
-        endcase
-    end
-    
+     end
+     
 endmodule
 
 `endif
