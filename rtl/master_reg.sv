@@ -39,8 +39,10 @@ module master_reg(
         next_valid_r = 1'b0;
         next_read_r = 1'b0;
         next_write_r = 1'b0;
-        next_addr_r = '0;
-        next_write_data_r = '0;
+        
+        //maintain
+        next_addr_r = addr_r;
+        next_write_data_r = write_data_r;
         
         case (state)
             ST_IDLE: begin
@@ -51,31 +53,37 @@ module master_reg(
 		next_valid_r = 1'b1;
 		
 		//switch one to change from read to write
-                next_read_r = 1'b0;
-        	next_write_r = 1'b1;
+                next_read_r = 1'b1;
+        	next_write_r = 1'b0;
                 
                 next_addr_r = 16'h0001;
+                next_write_data_r = 32'hDEACBEFF;
                 
                 if (busa.ready) begin
-                    next_state = ST_DATA_PHASE;
+                        next_state = ST_DATA_PHASE;
                 end
             end
             
             ST_DATA_PHASE: begin
             	next_valid_r = 1'b1;
-                
-                if(next_write_r) begin
-        		next_write_data_r = 32'hDEACBEFF;
-                end
+            	
                 //master don't do nothing, only look to read;
+                
+                if(write_r) begin
+                	next_write_data_r = '0;
+		end
                 
                 if (busa.ready) begin
                     next_state = ST_IDLE;
                 end
-                
               end
               
-            default: next_state = ST_IDLE;
+            default: begin
+            	next_state = ST_IDLE;
+            	next_valid_r = 1'b0;
+        	next_read_r = 1'b0;
+        	next_write_r = 1'b0;
+            end
             
         endcase
     end
@@ -87,6 +95,9 @@ module master_reg(
             write_data_r <= '0;
             state <= ST_IDLE;
             valid_r <= 1'b0;
+            
+            read_r <= '0;
+            addr_r <= '0;
         end
         else begin        
             state <= next_state;
