@@ -139,8 +139,16 @@ chmod +x run_verilator.sh
 3. No address or data displayed when both write and read are low.
 4. Address remains constant throughout the transaction cycle.
 
+![]()
+
+
 <p align="center">
-  <img height="545" src="https://github.com/user-attachments/assets/88110932-c2ff-4e02-a539-97dbab677a15" alt="bus_master_behavior" width="1914"> <br><em>Master bus behaviour</em>
+  <img height="545" src="https://github.com/user-attachments/assets/49bfaa31-54e5-4911-83f0-f397ec3bf3e4" alt="master_read_on" width="1914"> <br><em>Master bus read behaviour</em>
+</p>
+
+
+<p align="center">
+  <img height="545" src="https://github.com/user-attachments/assets/50fca363-cae0-4fa6-b219-37d0a231abe5" alt="master_write_on" width="1914"> <br><em>Master bus write behaviour</em>
 </p>
 
 
