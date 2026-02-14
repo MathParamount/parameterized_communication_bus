@@ -38,9 +38,9 @@ module slave_reg(
             ST_ADDR_PHASE: begin            	
                 ready_next = 1'b1;
                 
-                if (busc.valid) begin
+                if (busc.valid && ready_next) begin
                 	if(busc.read) begin
-             			read_data_next = 32'hDEADBEAB;	
+             			read_data_next = 32'hDEACBEFF;
              		end
              		next_state = ST_DATA_PHASE;
              	end
@@ -48,13 +48,15 @@ module slave_reg(
             
             ST_DATA_PHASE: begin
             	ready_next = 1'b1;
-            	if (busc.valid) begin
+            	
+            	if (busc.valid && ready_next) begin
                 	next_state = ST_IDLE;
             	end
             end
             
             default: begin
                 next_state = ST_IDLE;
+                ready_next = 1'b0;
             end
         endcase
     end
