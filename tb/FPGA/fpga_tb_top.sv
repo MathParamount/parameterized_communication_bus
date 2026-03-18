@@ -1,4 +1,4 @@
-module fpga_tb_top(input logic clk, input logic reset_n, output logic [3:0] led);
+module fpga_tb_top(input logic clk, input logic reset_n, output logic [4:0] led);
 
 	logic reset;
 	assign reset = ~reset_n;
@@ -65,5 +65,7 @@ module fpga_tb_top(input logic clk, input logic reset_n, output logic [3:0] led)
  assign led[1] = bus.ready;  // slaver
  assign led[2] = busa.write;
  assign led[3] = busa.read;
-
+ 
+ assign led[4] = counter;
+ 
 endmodule
