@@ -60,4 +60,10 @@ module fpga_tb_top(input logic clk, input logic reset_n, input logic led);
     counter <= counter + 1; 
  end
 
+
+ assign led[0] = busa.valid;
+ assign led[1] = bus.ready;  // slaver
+ assign led[2] = busa.write;
+ assign led[3] = busa.read;
+
 endmodule
