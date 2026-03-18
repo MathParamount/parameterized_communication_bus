@@ -1,4 +1,4 @@
-module fpga_tb_top(input logic clk, input logic reset_n, input logic led);
+module fpga_tb_top(input logic clk, input logic reset_n, output logic [3:0] led);
 
 	logic reset;
 	assign reset = ~reset_n;
