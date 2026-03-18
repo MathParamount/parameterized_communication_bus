@@ -3,17 +3,16 @@ module fpga_tb_top(input logic clk, input logic reset_n, input logic led);
 	logic reset;
 	assign reset = ~reset_n;
 
+ logic counter;
+
 	bus_if master_ug();
 	bus_if slaver_ug();
-	
-	#Defining clock
-	#10 clk = ~clk;
 
-	master_ug u_master(.clk(clk), .reset(reset), .busa(master_ug));
+	master_reg u_master(.clk(clk), .reset(reset), .busa(master_ug));
 	
 	arbiter u_arbiter(.busa(master_ug), .bus(slaver_ug));
 
-	slaver_ug u_slaver(.clk(clk), .reset(reset), .bus(slaver_ug));
+	slaver_reg u_slaver(.clk(clk), .reset(reset), .bus(slaver_ug));
 	
 	//first test
 	always_ff @(posedge clk)
@@ -22,7 +21,7 @@ module fpga_tb_top(input logic clk, input logic reset_n, input logic led);
 			led <= 1'b0;
 		end
 		else begin
-			led = ~led;
+			led <= ~led;
 		end
 	end
 	
@@ -56,4 +55,9 @@ module fpga_tb_top(input logic clk, input logic reset_n, input logic led);
 		end
 	end
 	
+ // contador de tempo
+ always_ff @(posedge clk) begin
+    counter <= counter + 1; 
+ end
+
 endmodule
