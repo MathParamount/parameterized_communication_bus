@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e   # Para o script se algo der erro
+set -e   # Stop anything if error
 
 TOP=tb_top
 BUILD_DIR=build
@@ -9,20 +9,29 @@ echo "===================================="
 echo " Building SystemVerilog with Verilator"
 echo "===================================="
 
-# Limpa build anterior
+# Clean the build
 rm -rf ${BUILD_DIR}
 mkdir -p ${BUILD_DIR}
 
-# Etapa 1: Verilator gera C++
+# Verilator generating the file
 verilator \
   --cc \
   --exe \
   --build \
   --trace \
   -Wall \
+  --assert \
+  --x-assign unique \
+  --x-initial unique \
   --top-module ${TOP} \
   -Irtl \
-  rtl/*.sv \
+  -Irtl/interface \
+  -Irtl/pkg \
+  rtl/pkg/axi_pkg.sv \
+  rtl/interface/bus_if.sv \
+  rtl/master_reg.sv \
+  rtl/slave_reg.sv \
+  rtl/arbiter.sv \
   tb/tb_top.sv \
   sim_main.cpp \
   -o sim_${TOP} \
@@ -39,3 +48,6 @@ echo "===================================="
 echo " Simulation finished successfully"
 echo "===================================="
 
+
+#Tip: The -I expects a direectory, not a file
+# rtl/**/*.sv \	-> 	#searching in subdirectories inside rtl repository
